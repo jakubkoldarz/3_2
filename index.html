@@ -8,16 +8,27 @@
         <title>Zadanie 3_1</title>
     </head>
     <body>
-        <div id="error"></div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Datatype</th>
-                    <th>Station</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+        <div class="container">
+            <h1>Filtrowanie stacji pogodowych</h1>
+
+            <div class="search-form">
+                <label for="stateInput">Kod stanu (np. CA, NY, TX):</label>
+                <input type="text" id="stateInput" placeholder="Wpisz kod stanu..." />
+                <button id="searchBtn">Szukaj</button>
+            </div>
+
+            <div id="error"></div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Station ID</th>
+                        <th>Name</th>
+                        <th>State</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </body>
 </html>
