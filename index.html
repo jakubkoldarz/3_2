@@ -4,31 +4,64 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="stylesheet" href="./styles.css" />
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script defer src="./script.js"></script>
-        <title>Zadanie 3_1</title>
+        <title>Zadanie 3_2</title>
     </head>
     <body>
         <div class="container">
-            <h1>Filtrowanie stacji pogodowych</h1>
+            <h1>Analiza danych klimatycznych NOAA</h1>
 
-            <div class="search-form">
-                <label for="stateInput">Kod stanu (np. CA, NY, TX):</label>
-                <input type="text" id="stateInput" placeholder="Wpisz kod stanu..." />
-                <button id="searchBtn">Szukaj</button>
-            </div>
+            <!-- Sekcja 1: Filtrowanie stacji -->
+            <section class="section">
+                <h2>1. Filtrowanie stacji pogodowych</h2>
+                <div class="search-form">
+                    <label for="stateInput">Kod stanu (np. CA, NY, TX):</label>
+                    <input type="text" id="stateInput" placeholder="Wpisz kod stanu..." />
+                    <button id="searchBtn">Szukaj</button>
+                </div>
 
-            <div id="error"></div>
+                <div id="error"></div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Station ID</th>
-                        <th>Name</th>
-                        <th>State</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+                <table id="stationsTable">
+                    <thead>
+                        <tr>
+                            <th>Station ID</th>
+                            <th>Name</th>
+                            <th>State</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </section>
+
+            <!-- Sekcja 2: Datasety w formie wykresu -->
+            <section class="section">
+                <h2>2. Liczba datasetów według dekady</h2>
+                <button id="loadDatasetsBtn" class="btn-primary">Pobierz dane o datasetach</button>
+                <div id="datasetError"></div>
+
+                <div id="datasetTableContainer" style="display: none">
+                    <h3>Tabela datasetów</h3>
+                    <table id="datasetsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nazwa</th>
+                                <th>Data początkowa</th>
+                                <th>Data końcowa</th>
+                                <th>Dekada</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <div id="chartContainer" style="display: none">
+                    <h3>Wykres: Liczba datasetów według dekady rozpoczęcia</h3>
+                    <canvas id="datasetsChart"></canvas>
+                </div>
+            </section>
         </div>
     </body>
 </html>

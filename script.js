@@ -7,7 +7,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const token = `UhPZSvlDOVgpnKRuRZwAJETGaUhCiRGO`;
     const baseUrl = `https://cors-anywhere.herokuapp.com/https://www.ncei.noaa.gov/cdo-web/api/v2/stations`;
 
-    // Mapowanie kodów stanów na kody FIPS
     const stateFipsMap = {
         AL: "01",
         AK: "02",
@@ -61,24 +60,20 @@ document.addEventListener("DOMContentLoaded", () => {
         WY: "56",
     };
 
-    // Funkcja do wyczyszczenia tabeli
     function clearTable() {
         tbody.innerHTML = "";
     }
 
-    // Funkcja do wyświetlenia błędu
     function showError(message) {
         errorDiv.textContent = message;
         errorDiv.style.display = "block";
     }
 
-    // Funkcja do ukrycia błędu
     function hideError() {
         errorDiv.textContent = "";
         errorDiv.style.display = "none";
     }
 
-    // Funkcja do pobierania i filtrowania stacji
     function searchStations() {
         const stateCode = stateInput.value.trim().toUpperCase();
 
@@ -87,7 +82,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Sprawdź czy kod stanu jest poprawny
         const fipsCode = stateFipsMap[stateCode];
         if (!fipsCode) {
             showError(`Nieprawidłowy kod stanu: ${stateCode}. Użyj dwuliterowego kodu (np. NY, CA, TX)`);
@@ -97,7 +91,6 @@ document.addEventListener("DOMContentLoaded", () => {
         hideError();
         clearTable();
 
-        // Użyj parametru locationid z kodem FIPS
         const url = `${baseUrl}?locationid=FIPS:${fipsCode}&limit=1000`;
 
         fetch(url, { headers: { token } })
@@ -115,7 +108,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
-                // Wyświetl stacje
                 data.results.forEach((station) => {
                     const row = document.createElement("tr");
 
@@ -141,13 +133,168 @@ document.addEventListener("DOMContentLoaded", () => {
             });
     }
 
-    // Obsługa kliknięcia przycisku
     searchBtn.addEventListener("click", searchStations);
 
-    // Obsługa naciśnięcia Enter w polu tekstowym
     stateInput.addEventListener("keypress", (e) => {
         if (e.key === "Enter") {
             searchStations();
         }
     });
+
+    // ===== SEKCJA 2: DATASETY I WYKRES =====
+    const loadDatasetsBtn = document.querySelector("#loadDatasetsBtn");
+    const datasetErrorDiv = document.querySelector("#datasetError");
+    const datasetTableContainer = document.querySelector("#datasetTableContainer");
+    const datasetsTableBody = document.querySelector("#datasetsTable tbody");
+    const chartContainer = document.querySelector("#chartContainer");
+    let datasetsChart = null;
+
+    function showDatasetError(message) {
+        datasetErrorDiv.textContent = message;
+        datasetErrorDiv.style.display = "block";
+        datasetErrorDiv.className = "error-message";
+    }
+
+    function hideDatasetError() {
+        datasetErrorDiv.textContent = "";
+        datasetErrorDiv.style.display = "none";
+    }
+
+    function getDecade(dateString) {
+        if (!dateString) return "Nieznana";
+        const year = new Date(dateString).getFullYear();
+        const decade = Math.floor(year / 10) * 10;
+        return `${decade}s`;
+    }
+
+    function loadDatasets() {
+        hideDatasetError();
+        datasetsTableBody.innerHTML = "";
+
+        const datasetsUrl = `https://cors-anywhere.herokuapp.com/https://www.ncei.noaa.gov/cdo-web/api/v2/datasets`;
+
+        fetch(datasetsUrl, { headers: { token } })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`Błąd HTTP: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                console.log("Datasets:", data);
+
+                if (!data.results || data.results.length === 0) {
+                    showDatasetError("Nie znaleziono datasetów");
+                    return;
+                }
+
+                const decadeCounts = {};
+
+                data.results.forEach((dataset) => {
+                    const decade = getDecade(dataset.mindate);
+
+                    if (decade !== "Nieznana") {
+                        decadeCounts[decade] = (decadeCounts[decade] || 0) + 1;
+                    }
+
+                    const row = document.createElement("tr");
+
+                    const idCell = document.createElement("td");
+                    idCell.textContent = dataset.id || "N/A";
+
+                    const nameCell = document.createElement("td");
+                    nameCell.textContent = dataset.name || "N/A";
+
+                    const mindateCell = document.createElement("td");
+                    mindateCell.textContent = dataset.mindate || "N/A";
+
+                    const maxdateCell = document.createElement("td");
+                    maxdateCell.textContent = dataset.maxdate || "N/A";
+
+                    const decadeCell = document.createElement("td");
+                    decadeCell.textContent = decade;
+
+                    row.appendChild(idCell);
+                    row.appendChild(nameCell);
+                    row.appendChild(mindateCell);
+                    row.appendChild(maxdateCell);
+                    row.appendChild(decadeCell);
+
+                    datasetsTableBody.appendChild(row);
+                });
+
+                datasetTableContainer.style.display = "block";
+
+                const sortedDecades = Object.keys(decadeCounts).sort();
+                const counts = sortedDecades.map((decade) => decadeCounts[decade]);
+
+                chartContainer.style.display = "block";
+                createChart(sortedDecades, counts);
+            })
+            .catch((error) => {
+                console.error("Błąd:", error);
+                showDatasetError(`Błąd podczas pobierania danych: ${error.message}`);
+            });
+    }
+
+    function createChart(labels, data) {
+        const ctx = document.querySelector("#datasetsChart");
+
+        if (datasetsChart) {
+            datasetsChart.destroy();
+        }
+
+        datasetsChart = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: "Liczba datasetów",
+                        data: data,
+                        backgroundColor: "rgba(74, 144, 226, 0.8)",
+                        borderColor: "rgba(74, 144, 226, 1)",
+                        borderWidth: 2,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                        },
+                        title: {
+                            display: true,
+                            text: "Liczba datasetów",
+                        },
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: "Dekada rozpoczęcia",
+                        },
+                    },
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: "top",
+                    },
+                    title: {
+                        display: true,
+                        text: "Rozkład datasetów według dekady rozpoczęcia",
+                        font: {
+                            size: 16,
+                        },
+                    },
+                },
+            },
+        });
+    }
+
+    loadDatasetsBtn.addEventListener("click", loadDatasets);
 });

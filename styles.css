@@ -126,3 +126,83 @@ tbody tr:hover {
 tbody tr:last-child td {
     border-bottom: none;
 }
+
+/* Sekcje */
+.section {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+h2 {
+    color: #333;
+    font-size: 22px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid #4a90e2;
+}
+
+h3 {
+    color: #555;
+    font-size: 18px;
+    margin: 25px 0 15px 0;
+}
+
+/* Przycisk główny */
+.btn-primary {
+    padding: 12px 30px;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.btn-primary:hover {
+    background-color: #357abd;
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+/* Komunikaty błędów */
+.error-message,
+#datasetError {
+    display: none;
+    background-color: #fee;
+    color: #c33;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    border-left: 4px solid #c33;
+    font-size: 14px;
+}
+
+/* Kontener wykresu */
+#chartContainer {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #fafafa;
+    border-radius: 8px;
+}
+
+#datasetsChart {
+    max-height: 400px;
+}
+
+/* Tabela datasetów */
+#datasetTableContainer {
+    margin-top: 20px;
+    overflow-x: auto;
+}
+
+#datasetsTable {
+    margin-top: 10px;
+}
