@@ -62,6 +62,48 @@
                     <canvas id="datasetsChart"></canvas>
                 </div>
             </section>
+
+            <!-- Sekcja 3: Wyszukiwanie danych dla kilku dat -->
+            <section class="section">
+                <h2>3. Wyszukiwanie danych dla kilku dat</h2>
+
+                <div class="data-search-form">
+                    <div class="form-group">
+                        <label for="datasetIdInput">Dataset ID (np. GHCND):</label>
+                        <input type="text" id="datasetIdInput" placeholder="GHCND" value="GHCND" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="locationIdInput">Location ID (np. ZIP:28801):</label>
+                        <input type="text" id="locationIdInput" placeholder="ZIP:28801" value="ZIP:28801" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Daty (YYYY-MM-DD):</label>
+                        <input type="date" id="date1Input" class="date-input" />
+                        <input type="date" id="date2Input" class="date-input" />
+                        <input type="date" id="date3Input" class="date-input" />
+                    </div>
+
+                    <button id="searchDataBtn" class="btn-primary">Pobierz dane</button>
+                </div>
+
+                <div id="dataError"></div>
+
+                <div id="dataResultContainer" style="display: none">
+                    <h3>Wyniki danych klimatycznych</h3>
+                    <table id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Datatype</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
         </div>
     </body>
 </html>

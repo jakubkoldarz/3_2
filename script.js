@@ -297,4 +297,129 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     loadDatasetsBtn.addEventListener("click", loadDatasets);
+
+    // ===== SEKCJA 3: WYSZUKIWANIE DANYCH DLA KILKU DAT =====
+    const searchDataBtn = document.querySelector("#searchDataBtn");
+    const datasetIdInput = document.querySelector("#datasetIdInput");
+    const locationIdInput = document.querySelector("#locationIdInput");
+    const date1Input = document.querySelector("#date1Input");
+    const date2Input = document.querySelector("#date2Input");
+    const date3Input = document.querySelector("#date3Input");
+    const dataErrorDiv = document.querySelector("#dataError");
+    const dataResultContainer = document.querySelector("#dataResultContainer");
+    const dataTableBody = document.querySelector("#dataTable tbody");
+
+    // Funkcja do wyświetlenia błędu danych
+    function showDataError(message) {
+        dataErrorDiv.textContent = message;
+        dataErrorDiv.style.display = "block";
+        dataErrorDiv.className = "error-message";
+    }
+
+    // Funkcja do ukrycia błędu danych
+    function hideDataError() {
+        dataErrorDiv.textContent = "";
+        dataErrorDiv.style.display = "none";
+    }
+
+    // Funkcja do pobierania danych dla jednej daty
+    async function fetchDataForDate(datasetId, locationId, date) {
+        const dataUrl = `https://cors-anywhere.herokuapp.com/https://www.ncei.noaa.gov/cdo-web/api/v2/data?datasetid=${datasetId}&locationid=${locationId}&startdate=${date}&enddate=${date}&limit=1000`;
+
+        try {
+            const response = await fetch(dataUrl, { headers: { token } });
+
+            if (!response.ok) {
+                throw new Error(`Błąd HTTP: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.results || [];
+        } catch (error) {
+            console.error(`Błąd dla daty ${date}:`, error);
+            return [];
+        }
+    }
+
+    // Funkcja do wyszukiwania danych dla wszystkich dat
+    async function searchData() {
+        const datasetId = datasetIdInput.value.trim();
+        const locationId = locationIdInput.value.trim();
+        const dates = [date1Input.value, date2Input.value, date3Input.value].filter((date) => date); // Usuń puste daty
+
+        // Walidacja
+        if (!datasetId) {
+            showDataError("Proszę podać Dataset ID");
+            return;
+        }
+
+        if (!locationId) {
+            showDataError("Proszę podać Location ID");
+            return;
+        }
+
+        if (dates.length === 0) {
+            showDataError("Proszę podać przynajmniej jedną datę");
+            return;
+        }
+
+        hideDataError();
+        dataTableBody.innerHTML = "";
+        dataResultContainer.style.display = "none";
+
+        // Pokaż komunikat ładowania
+        showDataError("Pobieranie danych...");
+        dataErrorDiv.style.backgroundColor = "#e3f2fd";
+        dataErrorDiv.style.color = "#1976d2";
+        dataErrorDiv.style.borderLeftColor = "#1976d2";
+
+        try {
+            // Pobierz dane dla wszystkich dat równolegle
+            const allDataPromises = dates.map((date) => fetchDataForDate(datasetId, locationId, date));
+
+            const allDataArrays = await Promise.all(allDataPromises);
+
+            // Połącz wszystkie wyniki w jedną tablicę
+            const allData = allDataArrays.flat();
+
+            hideDataError();
+
+            if (allData.length === 0) {
+                showDataError("Nie znaleziono danych dla podanych parametrów");
+                return;
+            }
+
+            // Sortuj dane według daty
+            allData.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            // Wypełnij tabelę
+            allData.forEach((item) => {
+                const row = document.createElement("tr");
+
+                const dateCell = document.createElement("td");
+                dateCell.textContent = item.date ? new Date(item.date).toLocaleDateString("pl-PL") : "N/A";
+
+                const datatypeCell = document.createElement("td");
+                datatypeCell.textContent = item.datatype || "N/A";
+
+                const valueCell = document.createElement("td");
+                valueCell.textContent = item.value !== undefined ? item.value : "N/A";
+
+                row.appendChild(dateCell);
+                row.appendChild(datatypeCell);
+                row.appendChild(valueCell);
+
+                dataTableBody.appendChild(row);
+            });
+
+            // Pokaż tabelę
+            dataResultContainer.style.display = "block";
+        } catch (error) {
+            console.error("Błąd:", error);
+            showDataError(`Błąd podczas pobierania danych: ${error.message}`);
+        }
+    }
+
+    // Obsługa przycisku wyszukiwania danych
+    searchDataBtn.addEventListener("click", searchData);
 });
