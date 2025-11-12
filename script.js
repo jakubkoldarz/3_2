@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const tbody = document.querySelector("tbody");
     const token = `UhPZSvlDOVgpnKRuRZwAJETGaUhCiRGO`;
-    const url = `https://cors-anywhere.herokuapp.com/https://www.ncei.noaa.gov/cdo-web/api/v2/stations`;
+    const url = `https://cors-anywhere.herokuapp.com/https://www.ncei.noaa.gov/cdo-web/api/v2/locationcategories`;
 
     fetch(url, { headers: { token } })
         .then((response) => response.json())
@@ -17,16 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const nameCell = document.createElement("td");
                 nameCell.textContent = station.name;
 
-                const latCell = document.createElement("td");
-                latCell.textContent = station.latitude;
-
-                const lonCell = document.createElement("td");
-                lonCell.textContent = station.longitude;
-
                 row.appendChild(idCell);
                 row.appendChild(nameCell);
-                row.appendChild(latCell);
-                row.appendChild(lonCell);
 
                 tbody.appendChild(row);
             });
