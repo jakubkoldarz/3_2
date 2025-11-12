@@ -4,7 +4,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const url = `https://cors-anywhere.herokuapp.com/https://www.ncei.noaa.gov/cdo-web/api/v2/data?datasetid=GHCND&locationid=ZIP:28801&startdate=2010-05-01&enddate=2010-05-01`;
 
     fetch(url, { headers: { token } })
-        .then((response) => response.json())
+        .then((response) => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                document.querySelector("#error").textContent = `Response error`;
+            }
+        })
         .then((data) => {
             console.log(data);
 
